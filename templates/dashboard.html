@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Low Expectations League - Fantasy Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-5 fade-in">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="bi bi-trophy-fill me-3"></i>
+            <span class="professional-gradient">{{ league_info.name if league_info else "Low Expectations League" }}</span>
+        </h1>
+        <p class="lead">{{ league_info.season if league_info else "2024" }} Season Analytics Dashboard</p>
+        <div class="accent-border d-inline-block px-4 py-2 rounded-pill">
+            <small class="text-info fw-bold">PROFESSIONAL LEAGUE MANAGEMENT SYSTEM</small>
+        </div>
+    </div>
+</div>
+
+<!-- Professional Stats Cards -->
+<div class="row mb-5 slide-up">
+    <div class="col-md-3 mb-4">
+        <div class="stats-card hover-lift glow-hover">
+            <i class="bi bi-calendar-range"></i>
+            <h5>Total Seasons</h5>
+            <h2>{{ quick_stats.total_seasons if quick_stats else "0" }}</h2>
+            <small>Years of Competition</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="stats-card hover-lift glow-hover">
+            <i class="bi bi-graph-up-arrow"></i>
+            <h5>Highest Score</h5>
+            <h2>{{ quick_stats.highest_score_ever if quick_stats else "0" }}</h2>
+            <small>All-Time Record</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="stats-card hover-lift glow-hover">
+            <i class="bi bi-bar-chart-line"></i>
+            <h5>All-Time Average</h5>
+            <h2>{{ quick_stats.average_score if quick_stats else "0" }}</h2>
+            <small>League Average</small>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="stats-card hover-lift glow-hover">
+            <i class="bi bi-trophy"></i>
+            <h5>Championships</h5>
+            <h2>{{ quick_stats.most_championships if quick_stats else "0" }}</h2>
+            <small>Most by One Owner</small>
+        </div>
+    </div>
+</div>
+
+<!-- Current Season Standings -->
+<div class="row mb-5 fade-in">
+    <div class="col-12">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-list-ol me-2"></i>
+                    Current Season Standings
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if current_season and current_season.standings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Team</th>
+                                    <th>Owner</th>
+                                    <th>Record</th>
+                                    <th>Win %</th>
+                                    <th>Points For</th>
+                                    <th>Points Against</th>
+                                    <th>Diff</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for team in current_season.standings %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-{% if loop.index <= 4 %}success{% elif loop.index <= 6 %}warning{% else %}secondary{% endif %}">
+                                            {{ loop.index }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ team.name }}</strong></td>
+                                    <td>{{ team.owner }}</td>
+                                    <td>{{ team.wins }}-{{ team.losses }}{% if team.ties > 0 %}-{{ team.ties }}{% endif %}</td>
+                                    <td>{{ "%.2f"|format(team.win_percentage) }}</td>
+                                    <td>{{ "%.2f"|format(team.points_for) }}</td>
+                                    <td>{{ "%.2f"|format(team.points_against) }}</td>
+                                    <td>
+                                        <span class="{% if team.points_for > team.points_against %}text-success{% else %}text-danger{% endif %}">
+                                            {{ "+%.2f"|format(team.points_for - team.points_against) if team.points_for > team.points_against else "%.2f"|format(team.points_for - team.points_against) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-exclamation-triangle display-1 text-muted"></i>
+                        <h5 class="mt-3">No Current Season Data</h5>
+                        <p class="text-muted">Unable to load current season standings. Please check your API configuration.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-crown me-2"></i>
+                    League Champions
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="card-text">View the complete championship history and see who has dominated the league over the years.</p>
+                <a href="{{ url_for('champions') }}" class="btn btn-warning">
+                    <i class="bi bi-trophy me-1"></i>View Champions
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    Detailed Statistics
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="card-text">Dive deep into scoring records, season stats, and all-time achievements.</p>
+                <a href="{{ url_for('stats') }}" class="btn btn-info">
+                    <i class="bi bi-graph-up me-1"></i>View Stats
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-people me-2"></i>
+                    Head-to-Head
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="card-text">Analyze matchup history and see who has the edge in head-to-head battles.</p>
+                <a href="{{ url_for('matchups') }}" class="btn btn-success">
+                    <i class="bi bi-shield-check me-1"></i>View Matchups
+                </a>
+            </div>
+        </div>
+    </div>
+    
+
+</div>
+
+<!-- League Insights Section -->
+{% if quick_stats %}
+<div class="row mt-5 slide-up">
+    <div class="col-12">
+        <div class="card hover-lift glow-hover">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    League Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-4">
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-controller" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Total Games</h6>
+                            <p class="h4 text-info">{{ quick_stats.total_games }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-graph-down-arrow" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Lowest Score</h6>
+                            <p class="h4 text-danger">{{ quick_stats.lowest_score_ever }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Active Teams</h6>
+                            <p class="h4 text-success">{{ quick_stats.current_season_teams }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-clock-history" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Last Updated</h6>
+                            <p class="h6 text-info">{{ quick_stats.last_updated }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Professional dashboard animations and interactions
+        
+        // Staggered animation for stats cards
+        const statsCards = document.querySelectorAll('.stats-card');
+        statsCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+        
+        // Enhanced hover effects for cards
+        const allCards = document.querySelectorAll('.card');
+        allCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px)';
+                this.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Professional table hover effects
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(6, 182, 212, 0.1)';
+                this.style.transform = 'scale(1.01)';
+                this.style.transition = 'all 0.3s ease';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.background = '';
+                this.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Smooth scroll to sections
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Add ripple effect
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        
+        // Loading state management
+        function showLoadingState() {
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
+            document.body.appendChild(loadingOverlay);
+            return loadingOverlay;
+        }
+        
+        function hideLoadingState(overlay) {
+            if (overlay && overlay.parentNode) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.remove();
+                }, 300);
+            }
+        }
+        
+        // Enhanced refresh functionality
+        window.refreshData = async function() {
+            const refreshBtn = document.querySelector('button[onclick="refreshData()"]');
+            const originalText = refreshBtn.innerHTML;
+            const loadingOverlay = showLoadingState();
+            
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Refreshing...';
+            refreshBtn.disabled = true;
+            refreshBtn.style.opacity = '0.7';
+            
+            try {
+                const response = await fetch('/api/refresh');
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success notification
+                    showNotification('Data refreshed successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showNotification('Error refreshing data: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showNotification('Network error: ' + error.message, 'error');
+            } finally {
+                hideLoadingState(loadingOverlay);
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+            }
+        };
+        
+        // Professional notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type} position-fixed`;
+            notification.style.cssText = `
+                top: 90px;
+                right: 20px;
+                z-index: 1055;
+                min-width: 300px;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            `;
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    notification.remove();
+                }, 400);
+            }, 4000);
+        }
+        
+        // Update timestamp with animation
+        function updateTimestamp() {
+            const timestampElement = document.getElementById('lastUpdated');
+            if (timestampElement) {
+                timestampElement.style.opacity = '0.5';
+                timestampElement.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    timestampElement.textContent = new Date().toLocaleString();
+                    timestampElement.style.opacity = '1';
+                }, 300);
+            }
+        }
+        
+        // Initialize timestamp updates
+        setInterval(updateTimestamp, 60000); // Update every minute
+    });
+</script>
+{% endblock %}

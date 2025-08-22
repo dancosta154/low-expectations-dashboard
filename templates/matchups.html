@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Head-to-Head - ESPN Fantasy Football{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="display-5">
+            <i class="bi bi-people text-primary me-3"></i>
+            Head-to-Head Analysis
+        </h1>
+        <p class="lead text-muted">Complete matchup history between all teams</p>
+    </div>
+</div>
+
+{% if matchups and matchups.head_to_head %}
+<!-- Summary Stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up display-4 mb-2"></i>
+                <h5 class="card-title">Total Matchups</h5>
+                <h2 class="mb-0">{{ matchups.total_matchups }}</h2>
+                <small>All league games</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-trophy display-4 mb-2"></i>
+                <h5 class="card-title">Most Played</h5>
+                <h2 class="mb-0">{{ matchups.head_to_head[0].total_games if matchups.head_to_head else 0 }}</h2>
+                <small>Games between teams</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="bi bi-bar-chart display-4 mb-2"></i>
+                <h5 class="card-title">Average Games</h5>
+                <h2 class="mb-0">{{ (matchups.head_to_head|map(attribute='total_games')|sum / matchups.total_matchups)|round(2) if matchups.total_matchups > 0 else 0 }}</h2>
+                <small>Per matchup</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Head-to-Head Results -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-shield-check me-2"></i>
+                    Complete Head-to-Head Records
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Team 1</th>
+                                <th>Team 2</th>
+                                <th>Record</th>
+                                <th>Games</th>
+                                <th>Team 1 Avg</th>
+                                <th>Team 2 Avg</th>
+                                <th>Total Points</th>
+                                <th>Series Leader</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for matchup in matchups.head_to_head %}
+                            <tr>
+                                <td><strong>{{ matchup.team1 }}</strong></td>
+                                <td><strong>{{ matchup.team2 }}</strong></td>
+                                <td>
+                                    <span class="badge bg-{% if matchup.team1_wins > matchup.team2_wins %}success{% elif matchup.team2_wins > matchup.team1_wins %}danger{% else %}secondary{% endif %}">
+                                        {{ matchup.team1_wins }}-{{ matchup.team2_wins }}
+                                    </span>
+                                </td>
+                                <td>{{ matchup.total_games }}</td>
+                                <td>{{ matchup.team1_avg }}</td>
+                                <td>{{ matchup.team2_avg }}</td>
+                                <td>{{ (matchup.team1_points + matchup.team2_points)|round(2) }}</td>
+                                <td>
+                                    {% if matchup.series_leader == "Tied" %}
+                                        <span class="badge bg-secondary">Tied</span>
+                                    {% elif matchup.series_leader == matchup.team1 %}
+                                        <span class="badge bg-success">{{ matchup.team1 }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ matchup.team2 }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Matchup Cards -->
+<div class="row mt-4">
+    <div class="col-12">
+        <h3 class="mb-3">
+            <i class="bi bi-grid me-2"></i>
+            Detailed Matchup Breakdown
+        </h3>
+    </div>
+    
+    {% for matchup in matchups.head_to_head %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-{% if matchup.series_leader == 'Tied' %}secondary{% else %}primary{% endif %} text-white">
+                <h6 class="mb-0 text-center">
+                    {{ matchup.team1 }} vs {{ matchup.team2 }}
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Win-Loss Record -->
+                <div class="row text-center mb-3">
+                    <div class="col-5">
+                        <div class="bg-{% if matchup.team1_wins > matchup.team2_wins %}success{% elif matchup.team1_wins < matchup.team2_wins %}danger{% else %}secondary{% endif %} text-white p-2 rounded">
+                            <strong>{{ matchup.team1_wins }}</strong>
+                            <br><small>Wins</small>
+                        </div>
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-center">
+                        <span class="text-muted">vs</span>
+                    </div>
+                    <div class="col-5">
+                        <div class="bg-{% if matchup.team2_wins > matchup.team1_wins %}success{% elif matchup.team2_wins < matchup.team1_wins %}danger{% else %}secondary{% endif %} text-white p-2 rounded">
+                            <strong>{{ matchup.team2_wins }}</strong>
+                            <br><small>Wins</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Scoring Averages -->
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <small class="text-muted">{{ matchup.team1 }} Avg</small>
+                        <div class="h5 text-primary">{{ matchup.team1_avg }}</div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">{{ matchup.team2 }} Avg</small>
+                        <div class="h5 text-info">{{ matchup.team2_avg }}</div>
+                    </div>
+                </div>
+                
+                <!-- Total Points -->
+                <div class="text-center mb-3">
+                    <small class="text-muted">Combined Points</small>
+                    <div class="h5 text-success">{{ (matchup.team1_points + matchup.team2_points)|round(2) }}</div>
+                </div>
+                
+                <!-- Series Leader -->
+                <div class="text-center">
+                    <small class="text-muted">Series Leader</small>
+                    <div>
+                        {% if matchup.series_leader == "Tied" %}
+                            <span class="badge bg-secondary fs-6">Series Tied</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark fs-6">{{ matchup.series_leader }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Games Played -->
+                <div class="text-center mt-2">
+                    <small class="text-muted">{{ matchup.total_games }} games played</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Rivalry Analysis -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-fire me-2"></i>
+                    Top Rivalries
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Most Games Played -->
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-primary">Most Games Played</h6>
+                        {% for matchup in (matchups.head_to_head|sort(attribute='total_games', reverse=true))[:3] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small">{{ matchup.team1 }} vs {{ matchup.team2 }}</span>
+                            <span class="badge bg-primary">{{ matchup.total_games }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Highest Scoring Matchups -->
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-success">Highest Scoring</h6>
+                        {% for matchup in (matchups.head_to_head|sort(attribute='team1_avg', reverse=true))[:3] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small">{{ matchup.team1 }} vs {{ matchup.team2 }}</span>
+                            <span class="badge bg-success">{{ ((matchup.team1_avg + matchup.team2_avg) / 2)|round(2) }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Most Competitive -->
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-warning">Most Competitive</h6>
+                        {% for matchup in (matchups.head_to_head|sort(attribute='total_games', reverse=true)) %}
+                            {% set win_diff = (matchup.team1_wins - matchup.team2_wins)|abs %}
+                            {% if loop.index <= 3 and win_diff <= 2 %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small">{{ matchup.team1 }} vs {{ matchup.team2 }}</span>
+                                <span class="badge bg-warning text-dark">{{ matchup.team1_wins }}-{{ matchup.team2_wins }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="bi bi-exclamation-triangle display-1 text-muted"></i>
+            <h3 class="mt-3">No Head-to-Head Data Available</h3>
+            <p class="text-muted">Unable to load matchup data. Please check your API configuration and try refreshing.</p>
+            <button class="btn btn-primary" onclick="refreshData()">
+                <i class="bi bi-arrow-clockwise me-1"></i>Refresh Data
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to matchup cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Sort table functionality
+    const table = document.querySelector('.table');
+    if (table) {
+        const headers = table.querySelectorAll('th');
+        headers.forEach((header, index) => {
+            if (index > 1) { // Skip team name columns
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', function() {
+                    sortTable(table, index);
+                });
+            }
+        });
+    }
+});
+
+function sortTable(table, column) {
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        const aText = a.cells[column].textContent.trim();
+        const bText = b.cells[column].textContent.trim();
+        
+        // Try to parse as numbers
+        const aNum = parseFloat(aText);
+        const bNum = parseFloat(bText);
+        
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+            return bNum - aNum; // Descending for numbers
+        }
+        
+        return aText.localeCompare(bText); // Ascending for text
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+{% endblock %}

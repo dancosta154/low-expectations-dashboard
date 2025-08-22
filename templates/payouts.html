@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block title %}Payouts - Low Expectations League{% endblock %}
+
+{% block content %}
+<div class="row mb-5 fade-in">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="bi bi-cash-coin me-3"></i>
+            <span class="professional-gradient">League Payouts</span>
+        </h1>
+        <p class="lead">Financial tracking and payout analysis</p>
+        {% if summary and summary.excluded_current_season %}
+        <div class="alert alert-info d-inline-block px-3 py-2 mb-0" style="border-radius: 20px; border: none;">
+            <i class="bi bi-info-circle me-1"></i>
+            <small><strong>Note:</strong> {{ summary.excluded_current_season }} season payouts will be calculated after finals completion</small>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Payout Structure Overview -->
+<div class="row mb-5 slide-up">
+    <div class="col-12">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-currency-dollar me-2"></i>
+                    Payout Structure
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-2">
+                        <div class="stats-card mb-0 h-100 d-flex flex-column justify-content-center">
+                            <div class="position-relative mb-3">
+                                <i class="bi bi-trophy-fill text-warning" style="font-size: 3rem; text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);"></i>
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge bg-warning text-dark rounded-pill px-2" style="font-size: 0.6rem;">👑</span>
+                                </div>
+                            </div>
+                            <h6 class="text-secondary mb-2 text-uppercase fw-bold">Champion</h6>
+                            <h3 class="text-success mb-1" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">${{ summary.payout_structure.champion if summary else "300" }}</h3>
+                            <small class="text-muted">1st Place</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stats-card mb-0 h-100 d-flex flex-column justify-content-center">
+                            <div class="position-relative mb-3">
+                                <i class="bi bi-award-fill text-info" style="font-size: 3rem; text-shadow: 0 0 15px rgba(6, 182, 212, 0.5);"></i>
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge bg-info text-dark rounded-pill px-2" style="font-size: 0.6rem;">🥈</span>
+                                </div>
+                            </div>
+                            <h6 class="text-secondary mb-2 text-uppercase fw-bold">Runner-Up</h6>
+                            <h3 class="text-success mb-1" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">${{ summary.payout_structure.runner_up if summary else "150" }}</h3>
+                            <small class="text-muted">2nd Place</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stats-card mb-0 h-100 d-flex flex-column justify-content-center">
+                            <div class="position-relative mb-3">
+                                <i class="bi bi-award-fill" style="font-size: 3rem; color: #cd7f32; text-shadow: 0 0 15px rgba(205, 127, 50, 0.5);"></i>
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge rounded-pill px-2" style="background-color: #cd7f32; color: white; font-size: 0.6rem;">🥉</span>
+                                </div>
+                            </div>
+                            <h6 class="text-secondary mb-2 text-uppercase fw-bold">3rd Place</h6>
+                            <h3 class="text-success mb-1" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">${{ summary.payout_structure.third_place if summary else "70" }}</h3>
+                            <small class="text-muted">Bronze Medal</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stats-card mb-0 h-100 d-flex flex-column justify-content-center">
+                            <div class="position-relative mb-3">
+                                <i class="bi bi-shield-fill text-primary" style="font-size: 3rem; text-shadow: 0 0 15px rgba(13, 110, 253, 0.5);"></i>
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge bg-primary rounded-pill px-2" style="font-size: 0.6rem;">4️⃣</span>
+                                </div>
+                            </div>
+                            <h6 class="text-secondary mb-2 text-uppercase fw-bold">4th Place</h6>
+                            <h3 class="text-success mb-1" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">${{ summary.payout_structure.fourth_place if summary else "50" }}</h3>
+                            <small class="text-muted">Playoff Finish</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stats-card mb-0 h-100 d-flex flex-column justify-content-center">
+                            <div class="position-relative mb-3">
+                                <i class="bi bi-lightning-charge-fill text-warning" style="font-size: 3rem; text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);"></i>
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge bg-warning text-dark rounded-pill px-2" style="font-size: 0.6rem;">⚡</span>
+                                </div>
+                            </div>
+                            <h6 class="text-secondary mb-2 text-uppercase fw-bold">Weekly High</h6>
+                            <h3 class="text-success mb-1" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">${{ summary.payout_structure.weekly_high if summary else "10" }}</h3>
+                            <small class="text-muted">Per Week</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="stats-card mb-0 h-100 d-flex flex-column justify-content-center">
+                            <div class="position-relative mb-3">
+                                <i class="bi bi-star-fill text-warning" style="font-size: 3rem; text-shadow: 0 0 15px rgba(255, 193, 7, 0.5);"></i>
+                                <div class="position-absolute top-0 start-50 translate-middle">
+                                    <span class="badge bg-warning text-dark rounded-pill px-2" style="font-size: 0.6rem;">🏆</span>
+                                </div>
+                            </div>
+                            <h6 class="text-secondary mb-2 text-uppercase fw-bold">Most Points</h6>
+                            <h3 class="text-success mb-1" style="text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);">${{ summary.payout_structure.most_points_regular if summary else "40" }}</h3>
+                            <small class="text-muted">Regular Season</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="row mb-4">
+    <div class="col-12">
+        <ul class="nav nav-pills nav-fill" id="payoutTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="cumulative-tab" data-bs-toggle="pill" data-bs-target="#cumulative" type="button" role="tab">
+                    <i class="bi bi-graph-up me-2"></i>Cumulative Leaderboard
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="seasons-tab" data-bs-toggle="pill" data-bs-target="#seasons" type="button" role="tab">
+                    <i class="bi bi-calendar-range me-2"></i>By Season
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="leaderboard-tab" data-bs-toggle="pill" data-bs-target="#leaderboard" type="button" role="tab">
+                    <i class="bi bi-trophy me-2"></i>Money Leaderboard
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content" id="payoutTabContent">
+    <!-- Cumulative Earnings Tab -->
+    <div class="tab-pane fade show active" id="cumulative" role="tabpanel">
+        {% if cumulative_payouts and cumulative_payouts.cumulative_payouts %}
+        <div class="row">
+            {% for owner_data in cumulative_payouts.cumulative_payouts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card hover-lift glow-hover h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-person-circle me-2"></i>
+                            {{ owner_data.owner }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h2 class="text-success">${{ owner_data.total_earnings }}</h2>
+                            <small class="text-muted">Total Earnings</small>
+                        </div>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="bg-primary bg-opacity-20 p-2 rounded">
+                                    <strong>{{ owner_data.championships }}</strong>
+                                    <br><small>Championships</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-info bg-opacity-20 p-2 rounded">
+                                    <strong>{{ owner_data.weekly_highs }}</strong>
+                                    <br><small>Weekly Highs</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="bg-warning bg-opacity-20 p-2 rounded">
+                                    <strong>{{ owner_data.runner_ups }}</strong>
+                                    <br><small>Runner-Ups</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-success bg-opacity-20 p-2 rounded">
+                                    <strong>{{ owner_data.most_points_regular }}</strong>
+                                    <br><small>Most Points</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <small class="text-muted">
+                                Avg: ${{ owner_data.avg_earnings_per_season }}/season
+                                <br>
+                                {{ owner_data.seasons_participated }} seasons participated
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-exclamation-triangle display-1 text-muted"></i>
+            <h3 class="mt-3">No Payout Data Available</h3>
+            <p class="text-muted">Unable to load cumulative payout information. Please check your data configuration.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- By Season Tab -->
+    <div class="tab-pane fade" id="seasons" role="tabpanel">
+        {% if season_payouts and season_payouts.seasons %}
+        {% for season_data in season_payouts.seasons %}
+        <div class="card hover-lift mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        {{ season_data.season }} Season
+                    </h5>
+                    <span class="badge bg-success fs-6">Total: ${{ season_data.season_total }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if season_data.payouts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Owner</th>
+                                <th>Total Earned</th>
+                                <th>Breakdown</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payout in season_data.payouts %}
+                            <tr>
+                                <td><strong>{{ payout.owner }}</strong></td>
+                                <td class="text-success fw-bold">${{ payout.total_payout }}</td>
+                                <td>
+                                    {% for detail in payout.details %}
+                                    <span class="badge bg-{% if detail.type == 'Champion' %}warning{% elif detail.type == 'Runner-Up' %}info{% elif detail.type == 'Weekly High Scores' %}primary{% else %}secondary{% endif %} me-1 mb-1">
+                                        {{ detail.type }}: ${{ detail.amount }}
+                                    </span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No payouts recorded for this season.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-exclamation-triangle display-1 text-muted"></i>
+            <h3 class="mt-3">No Season Data Available</h3>
+            <p class="text-muted">Unable to load season payout information. Please check your data configuration.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Money Leaderboard Tab -->
+    <div class="tab-pane fade" id="leaderboard" role="tabpanel">
+        {% if cumulative_payouts and cumulative_payouts.cumulative_payouts %}
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card hover-lift">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy me-2"></i>
+                            All-Time Money Leaders
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Owner</th>
+                                        <th>Total Earnings</th>
+                                        <th>Avg/Season</th>
+                                        <th>Championships</th>
+                                        <th>Weekly Highs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for owner_data in cumulative_payouts.cumulative_payouts %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-{% if loop.index == 1 %}warning{% elif loop.index == 2 %}secondary{% elif loop.index == 3 %}danger{% else %}primary{% endif %}">
+                                                {% if loop.index == 1 %}👑{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}{{ loop.index }}{% endif %}
+                                            </span>
+                                        </td>
+                                        <td><strong>{{ owner_data.owner }}</strong></td>
+                                        <td class="text-success fw-bold">${{ owner_data.total_earnings }}</td>
+                                        <td>${{ owner_data.avg_earnings_per_season }}</td>
+                                        <td>
+                                            <span class="badge bg-warning">{{ owner_data.championships }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ owner_data.weekly_highs }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-exclamation-triangle display-1 text-muted"></i>
+            <h3 class="mt-3">No Leaderboard Data Available</h3>
+            <p class="text-muted">Unable to load leaderboard information. Please check your data configuration.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Summary Statistics -->
+{% if summary %}
+<div class="row mt-5 slide-up">
+    <div class="col-12">
+        <div class="card hover-lift glow-hover">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Payout Summary Statistics
+                </h5>
+                {% if summary and summary.completed_seasons_only %}
+                <small class="text-muted">
+                    <i class="bi bi-check-circle me-1"></i>
+                    Completed seasons only ({{ summary.excluded_current_season }} in progress)
+                </small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row text-center g-4">
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-currency-dollar" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Total Payouts</h6>
+                            <p class="h4 text-success">${{ summary.total_payouts }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-calendar-range" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Seasons</h6>
+                            <p class="h4 text-info">{{ summary.total_seasons }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-graph-up-arrow" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Weekly Payouts</h6>
+                            <p class="h4 text-primary">${{ summary.total_weekly_payouts }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card mb-0">
+                            <i class="bi bi-calculator" style="font-size: 2rem;"></i>
+                            <h6 class="text-secondary mt-2">Avg/Season</h6>
+                            <p class="h4 text-warning">${{ summary.avg_payout_per_season }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced tab animations
+        const tabButtons = document.querySelectorAll('[data-bs-toggle="pill"]');
+        tabButtons.forEach(button => {
+            button.addEventListener('shown.bs.tab', function(event) {
+                const targetPane = document.querySelector(event.target.getAttribute('data-bs-target'));
+                if (targetPane) {
+                    // Animate cards in the new tab
+                    const cards = targetPane.querySelectorAll('.card');
+                    cards.forEach((card, index) => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    });
+                }
+            });
+        });
+        
+        // Enhanced hover effects for payout cards
+        const payoutCards = document.querySelectorAll('.card');
+        payoutCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+                this.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+        
+        // Money animation for earnings
+        const moneyElements = document.querySelectorAll('.text-success');
+        moneyElements.forEach(element => {
+            if (element.textContent.includes('$')) {
+                element.style.textShadow = '0 0 10px rgba(16, 185, 129, 0.3)';
+            }
+        });
+        
+        // Badge hover effects
+        const badges = document.querySelectorAll('.badge');
+        badges.forEach(badge => {
+            badge.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+            
+            badge.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    });
+</script>
+{% endblock %}

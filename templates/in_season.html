@@ -1,0 +1,712 @@
+{% extends "base.html" %}
+
+{% block title %}In-Season Analysis - ESPN Fantasy Football{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="bi bi-activity me-3"></i>
+            <span class="professional-gradient">In-Season Analysis</span>
+        </h1>
+        <p class="lead">Real-time insights, matchup analysis, and current season trends</p>
+        {% if analysis and analysis.current_season %}
+        <div class="badge bg-info fs-6 mb-3">
+            <i class="bi bi-calendar-check me-1"></i>
+            {{ analysis.current_season }} Season
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if analysis and not analysis.error %}
+<!-- Weekly Highlights -->
+{% if analysis.weekly_highlights and analysis.weekly_highlights.highlights %}
+<div class="row mb-5 slide-up">
+    <div class="col-12">
+        <div class="card hover-lift">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="bi bi-lightning-charge me-2"></i>
+                    Weekly Highlights & Storylines
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for highlight in analysis.weekly_highlights.highlights %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="stats-card mb-0 h-100 
+                                    {% if highlight.impact == 'high' %}border-success{% elif highlight.impact == 'medium' %}border-warning{% else %}border-danger{% endif %}">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-2 
+                                              {% if highlight.impact == 'high' %}text-success{% elif highlight.impact == 'medium' %}text-warning{% else %}text-danger{% endif %}">
+                                        {{ highlight.title }}
+                                    </h6>
+                                    <p class="text-muted small mb-0">{{ highlight.description }}</p>
+                                </div>
+                                <div class="ms-2">
+                                    {% if highlight.type == 'explosion' %}
+                                        <i class="bi bi-rocket text-success fs-4"></i>
+                                    {% elif highlight.type == 'struggle' %}
+                                        <i class="bi bi-thermometer-low text-danger fs-4"></i>
+                                    {% elif highlight.type == 'hot_streak' %}
+                                        <i class="bi bi-fire text-warning fs-4"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Navigation Tabs -->
+<div class="row mb-4">
+    <div class="col-12">
+        <ul class="nav nav-pills nav-fill" id="inSeasonTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="recent-tab" data-bs-toggle="pill" data-bs-target="#recent" type="button" role="tab">
+                    <i class="bi bi-graph-up me-2"></i>Recent Form
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="matchups-tab" data-bs-toggle="pill" data-bs-target="#matchups" type="button" role="tab">
+                    <i class="bi bi-crosshair me-2"></i>Matchup Intel
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="trends-tab" data-bs-toggle="pill" data-bs-target="#trends" type="button" role="tab">
+                    <i class="bi bi-trending-up me-2"></i>Season Trends
+                </button>
+            </li>
+                                    <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ai-tab" data-bs-toggle="pill" data-bs-target="#ai" type="button" role="tab">
+                                <i class="bi bi-megaphone me-2"></i>AI Trash Talk
+                            </button>
+                        </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content" id="inSeasonTabsContent">
+    <!-- Recent Form Tab -->
+    <div class="tab-pane fade show active" id="recent" role="tabpanel">
+        {% if analysis.recent_performances and analysis.recent_performances.performances %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card hover-lift mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-speedometer2 me-2"></i>
+                            Recent Performance Rankings
+                            <small class="text-muted">(Last {{ analysis.recent_performances.weeks_analyzed|length }} weeks)</small>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-bullseye text-primary"></i>
+                                    <h6>League Average</h6>
+                                    <h4 class="text-primary">{{ analysis.recent_performances.league_avg_recent }} pts</h4>
+                                    <small class="text-muted">Recent weeks</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Owner</th>
+                                        <th>Recent Avg</th>
+                                        <th>Trend</th>
+                                        <th>Best Week</th>
+                                        <th>Worst Week</th>
+                                        <th>Form Chart</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for perf in analysis.recent_performances.performances %}
+                                    <tr>
+                                        <td>
+                                            {% if loop.index == 1 %}
+                                                <i class="bi bi-trophy-fill text-warning fs-5"></i>
+                                            {% elif loop.index == 2 %}
+                                                <i class="bi bi-award-fill text-secondary fs-5"></i>
+                                            {% elif loop.index == 3 %}
+                                                <i class="bi bi-award text-warning fs-5"></i>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ loop.index }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td><strong>{{ perf.owner }}</strong></td>
+                                        <td>
+                                            <span class="fw-bold {% if perf.avg_recent > analysis.recent_performances.league_avg_recent %}text-success{% else %}text-danger{% endif %}">
+                                                {{ perf.avg_recent }} pts
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if perf.trend == 'hot' %}
+                                                <span class="badge bg-danger">🔥 Hot</span>
+                                            {% elif perf.trend == 'cold' %}
+                                                <span class="badge bg-info">❄️ Cold</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">📊 Stable</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-success">
+                                                <strong>{{ perf.best_week.score }}</strong>
+                                                <br><span class="text-muted">Week {{ perf.best_week.week }}</span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <small class="text-danger">
+                                                <strong>{{ perf.worst_week.score }}</strong>
+                                                <br><span class="text-muted">Week {{ perf.worst_week.week }}</span>
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% for score_data in perf.recent_scores %}
+                                                <div class="me-1 form-bar 
+                                                    {% if score_data.score > analysis.recent_performances.league_avg_recent * 1.2 %}form-bar-excellent
+                                                    {% elif score_data.score > analysis.recent_performances.league_avg_recent %}form-bar-good
+                                                    {% else %}form-bar-poor{% endif %}" 
+                                                    title="Week {{ score_data.week }}: {{ score_data.score }} pts"></div>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-graph-down display-1 text-muted"></i>
+            <h3 class="mt-3">No Recent Performance Data</h3>
+            <p class="text-muted">Need more completed weeks to analyze recent form.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Matchup Intel Tab -->
+    <div class="tab-pane fade" id="matchups" role="tabpanel">
+        {% if analysis.matchup_previews and analysis.matchup_previews.matchup_previews %}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Matchup Intelligence:</strong> {{ analysis.matchup_previews.analysis_note }}
+                </div>
+            </div>
+            
+            {% for preview in analysis.matchup_previews.matchup_previews %}
+            <div class="col-md-6 mb-4">
+                <div class="card hover-lift h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-crosshair me-2"></i>
+                            Matchup Preview
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Team 1 -->
+                        <div class="row mb-3 pb-3 border-bottom">
+                            <div class="col-6">
+                                <h6 class="fw-bold">{{ preview.team1.owner }}</h6>
+                                <div class="small">
+                                    <div class="text-primary fw-bold">{{ preview.team1.recent_avg }} pts/game</div>
+                                    <div class="mt-1">
+                                        {% if preview.team1.trend == 'hot' %}
+                                            <span class="badge bg-danger">🔥 Hot</span>
+                                        {% elif preview.team1.trend == 'cold' %}
+                                            <span class="badge bg-info">❄️ Cold</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">📊 Stable</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h6 class="fw-bold">{{ preview.team2.owner }}</h6>
+                                <div class="small">
+                                    <div class="text-primary fw-bold">{{ preview.team2.recent_avg }} pts/game</div>
+                                    <div class="mt-1">
+                                        {% if preview.team2.trend == 'hot' %}
+                                            <span class="badge bg-danger">🔥 Hot</span>
+                                        {% elif preview.team2.trend == 'cold' %}
+                                            <span class="badge bg-info">❄️ Cold</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">📊 Stable</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Insights -->
+                        <div class="mb-3">
+                            <div class="small mb-2">
+                                <strong>{{ preview.team1.owner }}:</strong> {{ preview.team1.insight }}
+                            </div>
+                            <div class="small">
+                                <strong>{{ preview.team2.owner }}:</strong> {{ preview.team2.insight }}
+                            </div>
+                        </div>
+                        
+                        <!-- Prediction -->
+                        <div class="bg-light p-3 rounded">
+                            <div class="small">
+                                <strong>Prediction:</strong> 
+                                <span class="text-success fw-bold">{{ preview.prediction.favorite }}</span> favored
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Confidence: {{ preview.prediction.confidence }}
+                            </div>
+                            <div class="small text-muted">
+                                {{ preview.prediction.key_factor }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-crosshair display-1 text-muted"></i>
+            <h3 class="mt-3">No Matchup Data Available</h3>
+            <p class="text-muted">Matchup previews will be available with more season data.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Season Trends Tab -->
+    <div class="tab-pane fade" id="trends" role="tabpanel">
+        <div class="row">
+            <div class="col-12">
+                <div class="card hover-lift">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trending-up me-2"></i>
+                            Season-Long Trends Analysis
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-construction me-2"></i>
+                            <strong>Coming Soon:</strong> Advanced trend analysis including:
+                            <ul class="mb-0 mt-2">
+                                <li>Scoring progression throughout the season</li>
+                                <li>Strength of schedule analysis</li>
+                                <li>Playoff race implications</li>
+                                <li>Historical matchup trends</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Placeholder trend visualizations -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-graph-up text-success"></i>
+                                    <h6>Scoring Trends</h6>
+                                    <h4 class="text-success">Coming Soon</h4>
+                                    <small class="text-muted">Week-by-week analysis</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-calendar-week text-info"></i>
+                                    <h6>Schedule Strength</h6>
+                                    <h4 class="text-info">Coming Soon</h4>
+                                    <small class="text-muted">Remaining opponents</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="stats-card text-center">
+                                    <i class="bi bi-trophy text-warning"></i>
+                                    <h6>Playoff Picture</h6>
+                                    <h4 class="text-warning">Coming Soon</h4>
+                                    <small class="text-muted">Standings projections</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ask AI Tab -->
+    <div class="tab-pane fade" id="ai" role="tabpanel">
+        {% if analysis.ai_analysis %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card hover-lift">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-robot me-2"></i>
+                            AI-Powered League Analysis
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if analysis.ai_analysis.status == 'waiting_for_data' %}
+                        <!-- Waiting for Season Data -->
+                        <div class="text-center py-4">
+                            <i class="bi bi-hourglass-split display-1 text-info mb-3"></i>
+                            <h4>AI Analysis Coming Soon</h4>
+                            <p class="text-muted mb-4">{{ analysis.ai_analysis.message }}</p>
+                            
+                            <div class="row">
+                                <div class="col-md-8 mx-auto">
+                                    <h6 class="mb-3">🤖 Planned AI Features:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        {% for feature in analysis.ai_analysis.features %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ feature }}
+                                            <span class="badge bg-success rounded-pill">Ready</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% elif analysis.ai_analysis.status == 'ai_unavailable' %}
+                        <!-- AI Service Not Available -->
+                        <div class="text-center py-4">
+                            <i class="bi bi-robot display-1 text-warning mb-3"></i>
+                            <h4>AI Service Not Available</h4>
+                            <p class="text-muted mb-4">{{ analysis.ai_analysis.message }}</p>
+                            
+                            <div class="row">
+                                <div class="col-md-10 mx-auto">
+                                    <h6 class="mb-3">🛠️ Setup Instructions:</h6>
+                                    <div class="text-start">
+                                        {% for instruction in analysis.ai_analysis.setup_instructions %}
+                                            {% if instruction == "" %}
+                                                <br>
+                                            {% else %}
+                                                <div class="mb-1">{{ instruction }}</div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    {% if analysis.ai_analysis.ai_status and analysis.ai_analysis.ai_status.provider_status %}
+                                    <div class="mt-4">
+                                        <h6 class="mb-3">📊 Provider Status:</h6>
+                                        <div class="row">
+                                            {% for provider, status in analysis.ai_analysis.ai_status.provider_status.items() %}
+                                            <div class="col-md-4 mb-2">
+                                                <div class="card {% if status.available %}border-success{% else %}border-secondary{% endif %}">
+                                                    <div class="card-body text-center py-2">
+                                                        <h6 class="mb-1">{{ provider|title }}</h6>
+                                                        <small class="{% if status.available %}text-success{% else %}text-muted{% endif %}">
+                                                            {% if status.available %}✅ Available{% else %}❌ {% if status.requires_key %}Need API Key{% else %}Not Running{% endif %}{% endif %}
+                                                        </small>
+                                                        <div class="text-muted small">{{ status.model }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="mt-3">
+                                        <button class="btn btn-primary" onclick="checkAIStatus()">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Check AI Status
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% elif analysis.ai_analysis.status == 'ready' %}
+                        <!-- AI Trash Talk and Weekly Analysis -->
+                        <div class="text-center mb-4">
+                            <h3 class="text-gradient fw-bold">🔥 AI TRASH TALK CENTRAL 🔥</h3>
+                            <p class="text-muted">Your weekly dose of AI-powered roasts, props, and matchup previews</p>
+                        </div>
+                        
+                        <!-- AI-Generated Trash Talk -->
+                        {% if analysis.ai_analysis.insights and analysis.ai_analysis.insights.status == 'success' %}
+                        <div class="card border-0 shadow-lg">
+                            <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-megaphone me-2"></i>
+                                    🤖 The AI Has Spoken
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="ai-analysis trash-talk-content">
+                                    {% set content = analysis.ai_analysis.insights.insights %}
+                                    {% set formatted_content = content|replace('**', '')|replace('<br>', '\n')|replace('\n\n', '\n') %}
+                                    {% for paragraph in formatted_content.split('\n') %}
+                                        {% if paragraph.strip() %}
+                                            {% if paragraph.startswith('🔥') or paragraph.startswith('💀') or paragraph.startswith('👑') or paragraph.startswith('🎯') %}
+                                                <div class="section-header mt-4 mb-3">
+                                                    <h5 class="text-primary fw-bold">{{ paragraph.strip() }}</h5>
+                                                </div>
+                                            {% else %}
+                                                <p class="mb-3">{{ paragraph.strip() }}</p>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="row mt-4 pt-3 border-top">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <i class="bi bi-robot me-1"></i>
+                                            Generated by {{ analysis.ai_analysis.insights.provider|title }} AI
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ analysis.ai_analysis.insights.timestamp }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Refresh Button -->
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary" onclick="refreshAIAnalysis()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Get Fresh Roasts
+                            </button>
+                        </div>
+                        
+                        {% else %}
+                        <!-- AI Ready but No Analysis Yet -->
+                        <div class="text-center py-4">
+                            <i class="bi bi-robot display-2 text-primary mb-3"></i>
+                            <h4>AI Trash-Talker is Warming Up!</h4>
+                            <p class="text-muted mb-4">The AI is ready to deliver some spicy takes and weekly roasts.</p>
+                            <button class="btn btn-primary btn-lg" onclick="refreshAIAnalysis()">
+                                <i class="bi bi-megaphone me-2"></i>Generate Weekly Trash Talk
+                            </button>
+                        </div>
+                        {% endif %}
+                        
+                        {% else %}
+                        <!-- Error State -->
+                        <div class="text-center py-4">
+                            <i class="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+                            <h4>AI Analysis Unavailable</h4>
+                            <p class="text-muted">{{ analysis.ai_analysis.message }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- AI Provider Information -->
+                        <div class="mt-4 p-4 bg-gradient rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="text-white">
+                                <h6 class="fw-bold">🔥 Powered by AI Trash Talk Engine</h6>
+                                <p class="small mb-2">
+                                    Advanced AI-powered weekly roasts, props, and matchup previews using cutting-edge language models. 
+                                    Get entertaining weekly recaps and spicy takes on your league's performances.
+                                </p>
+                                {% if analysis.ai_analysis.ai_status and analysis.ai_analysis.ai_status.active_provider %}
+                                <small class="opacity-75">
+                                    Currently roasting via: {{ analysis.ai_analysis.ai_status.active_provider.provider|title }} ({{ analysis.ai_analysis.ai_status.active_provider.model }})
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<!-- Error State -->
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+            <h3 class="mt-3">Unable to Load In-Season Analysis</h3>
+            {% if analysis and analysis.error %}
+            <p class="text-muted">{{ analysis.error }}</p>
+            {% else %}
+            <p class="text-muted">Please check your data configuration and try again.</p>
+            {% endif %}
+            <button class="btn btn-primary mt-3" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                Retry
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Last Updated -->
+{% if analysis and analysis.last_updated %}
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <small class="text-muted">
+            <i class="bi bi-clock me-1"></i>
+            Last updated: {{ analysis.last_updated }}
+        </small>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add staggered animations
+    const cards = document.querySelectorAll('.slide-up');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Enhanced tab switching with smooth transitions
+    const tabButtons = document.querySelectorAll('#inSeasonTabs button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Add ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Tooltip initialization for form charts
+    const formBars = document.querySelectorAll('[title]');
+    formBars.forEach(bar => {
+        bar.style.cursor = 'pointer';
+    });
+    
+});
+
+function refreshAIAnalysis() {
+    // Show user a loading state while page refreshes
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating Fresh Roasts...';
+    button.disabled = true;
+    
+    // Refresh the page to get new AI analysis
+    setTimeout(() => {
+        window.location.reload();
+    }, 500);
+}
+
+function checkAIStatus() {
+    // Refresh the page to check AI status
+    window.location.reload();
+}
+</script>
+
+<style>
+/* Custom animations for in-season page */
+.slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ripple effect for tabs */
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Form chart styling */
+.form-bar {
+    width: 8px;
+    height: 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.form-bar:hover {
+    transform: scale(1.1);
+}
+
+.form-bar-excellent {
+    background-color: #28a745;
+}
+
+.form-bar-good {
+    background-color: #ffc107;
+}
+
+.form-bar-poor {
+    background-color: #dc3545;
+}
+
+/* Form chart hover effects */
+[title]:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* AI Trash Talk Styling */
+.trash-talk-content {
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.trash-talk-content .section-header {
+    border-left: 4px solid #0891b2;
+    padding-left: 15px;
+    margin-left: -15px;
+    background: rgba(8, 145, 178, 0.1);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 15px;
+}
+
+.trash-talk-content p {
+    text-align: justify;
+    color: #e5e7eb;
+}
+
+.trash-talk-content .section-header h5 {
+    margin: 0;
+    color: #0891b2;
+    text-shadow: 0 0 10px rgba(8, 145, 178, 0.3);
+}
+</style>
+{% endblock %}
