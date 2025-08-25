@@ -95,34 +95,35 @@ class PayoutService:
         if teams:
             # Sort by final rank or playoff seed
             sorted_teams = sorted(teams, key=lambda x: x.get("final_rank", x.get("playoff_seed", 99)))
-            
-            if len(sorted_teams) >= 3:
-                third_place = sorted_teams[2]
-                owner = self._get_owner_name(third_place)
-                payouts[owner] += self.PAYOUT_STRUCTURE["third_place"]
-                payout_details[owner].append({
-                    "type": "3rd Place",
-                    "amount": self.PAYOUT_STRUCTURE["third_place"],
-                    "description": f"{season} 3rd Place"
-                })
-            
-            if len(sorted_teams) >= 4:
-                fourth_place = sorted_teams[3]
-                owner = self._get_owner_name(fourth_place)
-                payouts[owner] += self.PAYOUT_STRUCTURE["fourth_place"]
-                payout_details[owner].append({
-                    "type": "4th Place",
-                    "amount": self.PAYOUT_STRUCTURE["fourth_place"],
-                    "description": f"{season} 4th Place"
-                })
         
-        # 2. Most Points in Regular Season
+        if len(sorted_teams) >= 3:
+            third_place = sorted_teams[2]
+            owner = self._get_owner_name(third_place)
+            payouts[owner] += self.PAYOUT_STRUCTURE["third_place"]
+            payout_details[owner].append({
+                "type": "3rd Place",
+                "amount": self.PAYOUT_STRUCTURE["third_place"],
+                "description": f"{season} 3rd Place"
+            })
+        
+        if len(sorted_teams) >= 4:
+            fourth_place = sorted_teams[3]
+            owner = self._get_owner_name(fourth_place)
+            payouts[owner] += self.PAYOUT_STRUCTURE["fourth_place"]
+            payout_details[owner].append({
+                "type": "4th Place",
+                "amount": self.PAYOUT_STRUCTURE["fourth_place"],
+                "description": f"{season} 4th Place"
+            })
+        
+        # 2. Most Points in Regular Season (Weeks 1-15)
         regular_season_totals = defaultdict(float)
         regular_season_games = defaultdict(int)
         
         for matchup in season_data.get("matchups", []):
-            # Skip playoff games
-            if matchup.get("playoff", False):
+            week = matchup.get("week", 0)
+            # Only include weeks 1-15 for regular season points
+            if week < 1 or week > 15:
                 continue
                 
             for team in matchup.get("teams", []):
@@ -139,16 +140,17 @@ class PayoutService:
             payout_details[top_scorer].append({
                 "type": "Most Points (Regular)",
                 "amount": self.PAYOUT_STRUCTURE["most_points_regular"],
-                "description": f"{season} Most Points in Regular Season ({top_score:.2f} pts)"
+                "description": f"{season} Most Points in Regular Season (Weeks 1-15) ({top_score:.2f} pts)"
             })
         
-        # 3. Weekly High Scores
+        # 3. Weekly High Scores (Weeks 1-15 only)
         weekly_highs = {}
         weekly_high_details = defaultdict(int)
         
         for matchup in season_data.get("matchups", []):
             week = matchup.get("week", 0)
-            if week <= 0:
+            # Only include weeks 1-15 for weekly high scores
+            if week < 1 or week > 15:
                 continue
                 
             week_scores = []
