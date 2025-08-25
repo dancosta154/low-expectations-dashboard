@@ -17,7 +17,7 @@ class PayoutService:
         "champion": 300,           # League Champion: $300
         "runner_up": 150,          # Runner-Up: $150
         "third_place": 70,         # 3rd Place: $70
-        "fourth_place": 50,        # 4th Place: $50
+        "fourth_place": 40,        # 4th Place: $40
         "weekly_high": 10,         # Weekly High Score: $10
         "most_points_regular": 40  # Most Points in Regular Season: $40
     }
